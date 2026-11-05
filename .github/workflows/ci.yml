@@ -23,6 +23,6 @@ jobs:
       - run: cp .env.example .env
       - run: docker compose up --build -d
       - run: docker compose exec -T api python -m backend.app.scripts.seed
-      - run: uv run python -m backend.app.scripts.smoke_demo
+      - run: docker compose exec -T api python -m backend.app.scripts.smoke_demo
       - if: always()
         run: docker compose down -v

@@ -8,11 +8,11 @@ Measured locally with the default deterministic demo providers after `docker com
 
 | Mode | Recall@5 | MRR | nDCG |
 |---|---:|---:|---:|
-| Vector only | 0.750 | 0.688 | 0.703 |
-| Hybrid RRF | 0.750 | 0.700 | 0.713 |
+| Vector only | 0.750 | 0.673 | 0.692 |
+| Hybrid RRF | 0.750 | 0.690 | 0.704 |
 | Hybrid + lexical rerank | 0.650 | 0.650 | 0.650 |
 
-Citation precision: 0.800; groundedness: 0.800; abstention accuracy: 0.800. Hybrid retrieval latency: p50 0.8 ms, p95 1.0 ms over 40 queries. These figures are from one small local run and are not a production performance claim.
+Citation precision: 0.800; groundedness: 0.800; abstention accuracy: 0.800. Hybrid retrieval latency: p50 0.8 ms, p95 1.2 ms over 40 queries. These figures are from one small local run with the offline tokenizer fallback and are not a production performance claim.
 
 ## Interpretation limits
 
