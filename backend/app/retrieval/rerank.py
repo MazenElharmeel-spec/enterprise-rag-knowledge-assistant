@@ -88,11 +88,24 @@ async def rerank(query: str, hits: list[Hit]) -> list[Hit]:
             return sorted(hits, key=lambda hit: order.get(hits.index(hit) + 1, 1000))
         except Exception:
             pass
-    scored = [(_lexical_score(query, hit.text), hit) for hit in hits]
-    # In demo mode, a weak lexical match is not enough evidence to answer.
-    scored = [(score, hit) for score, hit in scored if score >= 0.35]
-    if not scored:
-        return []
-    return [
-        hit for _, hit in sorted(scored, key=lambda pair: (pair[0], pair[1].score), reverse=True)
-    ]
+    # Keep the fused retrieval order as a backstop. Exact token overlap is useful
+    # for ranking, but dropping every low-overlap candidate made paraphrased
+    # questions abstain even when vector/full-text retrieval had found evidence.
+    max_rrf = max((hit.score for hit in hits), default=0.0)
+    if max_rrf <= 0:
+        return hits
+
+    lexical_weight = 0.5
+    scored = []
+    for hit in hits:
+        lexical = _lexical_score(query, hit.text)
+        fused = hit.score / max_rrf
+        combined = lexical_weight * lexical + (1 - lexical_weight) * fused
+        scored.append((combined, lexical, hit))
+
+    ranked = sorted(
+        scored,
+        key=lambda item: (item[0], item[1], item[2].score, str(item[2].chunk_id)),
+        reverse=True,
+    )
+    return [replace(hit, score=combined) for combined, _, hit in ranked]

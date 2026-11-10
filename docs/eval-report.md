@@ -1,19 +1,21 @@
-# Evaluation report
+# Local retrieval evaluation
 
-The evaluation runner is `backend.app.evals.cli` and includes 40 fixed cases: 30 answerable questions mapped to seeded document titles and 10 abstention/adversarial questions. It reports vector-only, hybrid RRF, and hybrid-plus-rerank recall@5, MRR, and nDCG, as well as citation precision, groundedness, abstention accuracy, and retrieval latency p50/p95.
+## Setup and scope
 
-## Latest measured run
+The CLI evaluates 40 fixed questions against 3 short synthetic documents: 30 answerable questions and 10 abstention or adversarial questions. This is a deterministic local demo using the fake hash embedder, lexical fallback reranker, and fake answer generator. The latency numbers are from one local run and should not be read as production performance.
 
-Measured locally with the default deterministic demo providers after `docker compose up --build -d`, seeding, and running `backend.app.evals.cli` (40 questions):
+## Reranking change
 
-| Mode | Recall@5 | MRR | nDCG |
-|---|---:|---:|---:|
-| Vector only | 0.750 | 0.673 | 0.692 |
-| Hybrid RRF | 0.750 | 0.690 | 0.704 |
-| Hybrid + lexical rerank | 0.650 | 0.650 | 0.650 |
+The lexical fallback previously applied a hard overlap cutoff after candidate retrieval. That removed fused candidates when a relevant passage expressed the answer with different wording. It now keeps the fused candidate pool and blends normalized reciprocal-rank-fusion and lexical scores at equal weight. This lets lexical overlap improve ordering without acting as a hard gate.
 
-Citation precision: 0.800; groundedness: 0.800; abstention accuracy: 0.800. Hybrid retrieval latency: p50 0.8 ms, p95 1.2 ms over 40 queries. These figures are from one small local run with the offline tokenizer fallback and are not a production performance claim.
+On the same seeded corpus and fixed questions, hybrid retrieval plus reranking changed as follows:
 
-## Interpretation limits
+| Measure | Before | After |
+| --- | ---: | ---: |
+| Recall@5 | 0.625 | 0.750 |
+| MRR | 0.625 | 0.738 |
+| nDCG | 0.625 | 0.741 |
 
-The demo corpus has three short documents and uses deterministic token-hash vectors plus a lexical demo reranker. The conservative answerability gate favors abstention when exact query terms do not overlap enough, which can lower recall on paraphrases. Metrics are a wiring check, not evidence of production retrieval quality. Re-run after switching embedding providers, expanding the corpus, and adding reviewer-labeled expected chunks.
+The vector-only and hybrid-RRF baselines remained at Recall@5 0.750. The post-change hybrid RRF baseline scored MRR 0.658 and nDCG 0.682; the reranked path scored MRR 0.738 and nDCG 0.741. Citation precision, groundedness, and abstention accuracy were each 0.700 in the post-change run. Retrieval p50/p95 was 0.7/1.0 ms for 40 queries in the latest run.
+
+These results show improvement on this small fixed set, not general semantic retrieval quality. In a separate two-user ACL smoke test, Bob received no unauthorized citations across two requests (one direct access query and one injection-style query) and received HTTP 404 when opening Alice's restricted citation.

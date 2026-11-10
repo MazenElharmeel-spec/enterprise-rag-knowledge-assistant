@@ -63,7 +63,7 @@ async def main() -> None:
             f"{hidden_source.status_code if hidden_source is not None else 'not attempted'}"
         )
     print(
-        "Permission smoke passed: Alice can cite Strategy notes; Bob cannot retrieve, cite, or open it, including after an injection query."
+        "Permission smoke passed: Alice can cite Strategy notes; Bob had 0 unauthorized citations across 2 requests (direct and injection-style) and received 404 when opening Alice's restricted citation."
     )
 
 

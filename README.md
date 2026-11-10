@@ -110,7 +110,7 @@ Passwords use Argon2id. Signed access and refresh tokens include user and organi
 
 ## Evaluation
 
-Run `make eval` after `make seed`. The CLI uses 40 fixed questions (30 answerable over the seeded corpus, 10 that should be declined), compares vector-only, hybrid RRF, and hybrid plus reranking, and reports recall@5, MRR, nDCG, citation precision, groundedness, abstention accuracy, and p50/p95 retrieval latency. `docs/eval-report.md` is updated with measured output after a local run. CI runs the two-user permission smoke path against Compose.
+Run `make eval` after `make seed`. The CLI uses 40 fixed questions (30 answerable over the seeded corpus, 10 that should be declined), compares vector-only, hybrid RRF, and hybrid plus reranking, and reports recall@5, MRR, nDCG, citation precision, groundedness, abstention accuracy, and p50/p95 retrieval latency. See [`docs/eval-report.md`](docs/eval-report.md) for measured output and limits of this synthetic local evaluation. CI runs the two-user permission smoke path against Compose.
 
 ## Tests and CI
 
